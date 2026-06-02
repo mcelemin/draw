@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>All STARS World Cup Draw</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',sans-serif;background:linear-gradient(135deg,#1a0a2e,#16213e,#0f3460);min-height:100vh;color:#fff;overflow-x:hidden}
+.header{text-align:center;padding:25px 20px 10px}
+.header h1{font-size:2.2em;text-shadow:0 0 20px rgba(255,215,0,0.5)}
+.header h1 span{color:#ffd700}
+.header p{color:#aaa;font-size:1em;margin-top:5px}
+#start-btn{display:block;margin:25px auto;padding:16px 45px;font-size:1.3em;font-weight:bold;background:linear-gradient(45deg,#ffd700,#ff8c00);color:#1a0a2e;border:none;border-radius:50px;cursor:pointer;box-shadow:0 0 30px rgba(255,215,0,0.4);transition:transform .2s}
+#start-btn:hover{transform:scale(1.08)}
+.ball-reveal{min-height:130px;display:flex;justify-content:center;align-items:center}
+.ball{width:105px;height:105px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:bold;animation:dropIn .6s ease-out;box-shadow:0 5px 30px rgba(0,0,0,0.6);text-align:center}
+.ball .flag{font-size:1.9em}
+.ball .name{font-size:.9em;margin-top:2px}
+.ball small{font-size:.7em;margin-top:2px}
+@keyframes dropIn{0%{transform:translateY(-250px) scale(.4);opacity:0}60%{transform:translateY(10px) scale(1.05)}100%{transform:translateY(0) scale(1)}}
+.pot1-ball{background:radial-gradient(circle at 30% 30%,#ffd700,#b8860b);color:#1a0a2e}
+.pot2-ball{background:radial-gradient(circle at 30% 30%,#c0c0c0,#708090);color:#1a0a2e}
+.pot3-ball{background:radial-gradient(circle at 30% 30%,#cd7f32,#8b4513);color:#fff}
+.pot-label{text-align:center;margin:8px 0;font-size:1.2em;color:#ffd700}
+.groups-container{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;padding:15px 25px;max-width:1100px;margin:0 auto}
+.group-card{background:rgba(255,255,255,.05);border:1px solid rgba(255,215,0,.3);border-radius:12px;padding:12px;backdrop-filter:blur(5px)}
+.group-card h3{text-align:center;color:#ffd700;margin-bottom:8px;font-size:1em}
+.group-team{display:flex;align-items:center;gap:6px;padding:5px 7px;margin:3px 0;border-radius:6px;background:rgba(255,255,255,.05);font-size:.85em;animation:fadeIn .4s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateX(-10px)}to{opacity:1;transform:translateX(0)}}
+.pot-badge{font-size:.65em;padding:2px 5px;border-radius:10px}
+.pot1-badge{background:#ffd700;color:#1a0a2e}
+.pot2-badge{background:#c0c0c0;color:#1a0a2e}
+.pot3-badge{background:#cd7f32;color:#fff}
+.not-qualified{text-align:center;margin:15px auto;padding:12px;background:rgba(255,0,0,.1);border:1px solid rgba(255,0,0,.3);border-radius:12px;max-width:550px}
+.not-qualified h3{color:#ff6b6b;margin-bottom:6px;font-size:.95em}
+.not-qualified .team{display:inline-block;margin:3px 8px;color:#aaa;font-size:.85em}
+.complete-msg{text-align:center;padding:20px;font-size:1.4em;color:#ffd700;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.7}}
+.bracket{max-width:900px;margin:20px auto;padding:15px;text-align:center}
+.bracket h2{color:#ffd700;margin-bottom:15px}
+.bracket-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;max-width:500px;margin:0 auto}
+.match{background:rgba(255,255,255,.05);border:1px solid rgba(255,215,0,.2);border-radius:8px;padding:8px;font-size:.85em}
+.match .vs{color:#ffd700;font-weight:bold}
+.cat-tag{font-size:.6em;padding:1px 4px;border-radius:4px;background:rgba(255,255,255,.15);margin-left:4px}
+</style>
+</head>
+<body>
+<div class="header">
+<h1>🏆 All STARS <span>World Cup</span> Draw</h1>
+<p>The Draw Ceremony</p>
+</div>
+<div id="app"></div>
+
+<script>
+const sites=[
+  {name:"BHX8",flag:"🇬🇧",cat:"AR",pts:418},{name:"LBA8",flag:"🇬🇧",cat:"AR",pts:414},
+  {name:"BLQ8",flag:"🇮🇹",cat:"AR",pts:405},{name:"STN8",flag:"🇬🇧",cat:"AR",pts:259},
+  {name:"DTM9",flag:"🇩🇪",cat:"AR",pts:140},{name:"SBS2",flag:"🇬🇧",cat:"Manual/AMXL",pts:312},
+  {name:"SNG1",flag:"🇬🇧",cat:"Manual/AMXL",pts:228},{name:"LEJ7",flag:"🇩🇪",cat:"Manual/AMXL",pts:205},
+  {name:"SXW2",flag:"🇬🇧",cat:"Manual/AMXL",pts:198},{name:"KSF7",flag:"🇩🇪",cat:"Manual/AMXL",pts:146},
+  {name:"MUC7",flag:"🇩🇪",cat:"Manual/AMXL",pts:120},{name:"CDG8",flag:"🇫🇷",cat:"Manual/AMXL",pts:60},
+  {name:"DTM8",flag:"🇩🇪",cat:"MHE",pts:258},{name:"MAD8",flag:"🇪🇸",cat:"MHE",pts:192},
+  {name:"FRAX",flag:"🇩🇪",cat:"MHE",pts:93},{name:"NUE9",flag:"🇩🇪",cat:"MHE",pts:85},
+  {name:"LIN8",flag:"🇮🇹",cat:"Auto",pts:322},{name:"BCN8",flag:"🇪🇸",cat:"Auto",pts:305},
+  {name:"MAN8",flag:"🇬🇧",cat:"Auto",pts:299},{name:"LYS8",flag:"🇫🇷",cat:"Auto",pts:282},
+  {name:"FCO8",flag:"🇮🇹",cat:"Auto",pts:191},{name:"HAJ8",flag:"🇩🇪",cat:"Auto",pts:181},
+  {name:"ORY8",flag:"🇫🇷",cat:"Auto",pts:169},{name:"LCY8",flag:"🇬🇧",cat:"Auto",pts:166},
+  {name:"LIL8",flag:"🇫🇷",cat:"Auto",pts:166},{name:"BER8",flag:"🇩🇪",cat:"Auto",pts:109},
+];
+
+const notQualified=sites.filter(s=>s.pts<100);
+const qualified=sites.filter(s=>s.pts>=100);
+const categories=["AR","Manual/AMXL","MHE","Auto"];
+let pot1=[],pot2=[],pot3=[];
+
+categories.forEach(cat=>{
+  const cs=qualified.filter(s=>s.cat===cat).sort((a,b)=>b.pts-a.pts);
+  cs.forEach((s,i)=>{
+    if(i<2){s.pot=1;pot1.push(s)}
+    else if(i<4){s.pot=2;pot2.push(s)}
+    else{s.pot=3;pot3.push(s)}
+  });
+});
+pot1.sort((a,b)=>b.pts-a.pts);
+pot2.sort((a,b)=>b.pts-a.pts);
+pot3.sort((a,b)=>b.pts-a.pts);
+
+// Seeded RNG for determinism
+function seededRandom(seed){let s=seed;return function(){s=(s*1664525+1013904223)&0xFFFFFFFF;return(s>>>0)/0xFFFFFFFF}}
+const NUM_GROUPS=8,rng=seededRandom(2026);
+
+function performDraw(){
+  const groups=Array.from({length:NUM_GROUPS},(_,i)=>({name:String.fromCharCode(65+i),teams:[],cats:new Set(),countries:new Set()}));
+
+  function getCountry(flag){
+    const map={"🇬🇧":"UK","🇩🇪":"DE","🇮🇹":"IT","🇪🇸":"ES","🇫🇷":"FR"};
+    return map[flag]||"??";
+  }
+  function canPlace(team,group){
+    if(group.teams.length>=3) return false;
+    if(group.cats.has(team.cat)) return false;
+    return true;
+  }
+  function canPlaceStrict(team,group){
+    if(!canPlace(team,group)) return false;
+    if(group.countries.has(getCountry(team.flag))) return false;
+    return true;
+  }
+  function addToGroup(team,group){
+    group.teams.push(team);group.cats.add(team.cat);group.countries.add(getCountry(team.flag));
+  }
+
+  // Place pot1: 1 per group (8 teams, 8 groups)
+  const p1=[...pot1];
+  for(let g=0;g<NUM_GROUPS;g++){
+    let avail=p1.filter(t=>canPlaceStrict(t,groups[g]));
+    if(!avail.length) avail=p1.filter(t=>canPlace(t,groups[g]));
+    if(!avail.length) avail=p1;
+    const pick=avail[Math.floor(rng()*avail.length)];
+    addToGroup(pick,groups[g]);
+    p1.splice(p1.indexOf(pick),1);
+  }
+
+  // Place pot2: distribute 6 teams across groups (max 1 pot2 per group)
+  const p2=[...pot2];
+  const g2order=[...Array(NUM_GROUPS).keys()];
+  for(let i=g2order.length-1;i>0;i--){const j=Math.floor(rng()*(i+1));[g2order[i],g2order[j]]=[g2order[j],g2order[i]]}
+  for(const g of g2order){
+    if(!p2.length) break;
+    let avail=p2.filter(t=>canPlaceStrict(t,groups[g]));
+    if(!avail.length) avail=p2.filter(t=>canPlace(t,groups[g]));
+    if(!avail.length) continue;
+    const pick=avail[Math.floor(rng()*avail.length)];
+    addToGroup(pick,groups[g]);
+    p2.splice(p2.indexOf(pick),1);
+  }
+
+  // Place pot3: fill groups to max 3, respecting category
+  const p3=[...pot3];
+  let safety=0;
+  while(p3.length>0&&safety<100){
+    const minSize=Math.min(...groups.map(g=>g.teams.length));
+    const targets=groups.filter(g=>g.teams.length===minSize&&g.teams.length<3);
+    if(!targets.length) break;
+    let placed=false;
+    for(const g of targets){
+      let avail=p3.filter(t=>canPlaceStrict(t,g));
+      if(!avail.length) avail=p3.filter(t=>canPlace(t,g));
+      if(avail.length){
+        const pick=avail[Math.floor(rng()*avail.length)];
+        addToGroup(pick,g);
+        p3.splice(p3.indexOf(pick),1);
+        placed=true;break;
+      }
+    }
+    if(!placed){
+      // Last resort: relax country, then relax category if needed
+      const anyTarget=groups.filter(g=>g.teams.length<3);
+      for(const g of anyTarget){
+        let avail=p3.filter(t=>canPlace(t,g));
+        if(avail.length){
+          const pick=avail[Math.floor(rng()*avail.length)];
+          addToGroup(pick,g);p3.splice(p3.indexOf(pick),1);placed=true;break;
+        }
+      }
+      if(!placed){
+        // Absolute last resort: ignore category too
+        for(const g of anyTarget){
+          if(p3.length){
+            const pick=p3[Math.floor(rng()*p3.length)];
+            addToGroup(pick,g);p3.splice(p3.indexOf(pick),1);placed=true;break;
+          }
+        }
+      }
+      if(!placed) break;
+    }
+    safety++;
+  }
+  return groups;
+}
+
+const drawResult=performDraw();
+
+// Build draw order: pot1 first, then pot2, then pot3
+const drawOrder=[];
+[1,2,3].forEach(pot=>{
+  for(let g=0;g<NUM_GROUPS;g++){
+    drawResult[g].teams.filter(t=>t.pot===pot).forEach(team=>{
+      drawOrder.push({team,group:drawResult[g].name,pot});
+    });
+  }
+});
+
+// RENDER
+const app=document.getElementById('app');
+
+function showInitial(){
+  let h='';
+  if(notQualified.length){
+    h+=`<div class="not-qualified"><h3>❌ Not Qualified (Below 100 pts)</h3>`;
+    notQualified.forEach(t=>{h+=`<span class="team">${t.flag} ${t.name} (${t.pts})</span>`});
+    h+=`</div>`;
+  }
+  h+=`<button id="start-btn" onclick="startDraw()">⚽ Start The Draw</button>`;
+  h+=`<div id="ball-container" class="ball-reveal"></div>`;
+  h+=`<div id="pot-label"></div>`;
+  h+=`<div class="groups-container" id="groups">`;
+  for(let g=0;g<NUM_GROUPS;g++){
+    const size=drawResult[g].teams.length;
+    h+=`<div class="group-card" id="group-${g}"><h3>Group ${drawResult[g].name} (${size})</h3></div>`;
+  }
+  h+=`</div>`;
+  h+=`<div id="bracket-area"></div>`;
+  app.innerHTML=h;
+}
+
+function startDraw(){
+  document.getElementById('start-btn').remove();
+  revealNext(0);
+}
+
+function revealNext(idx){
+  if(idx>=drawOrder.length){
+    document.getElementById('ball-container').innerHTML=`<div class="complete-msg">🎉 The Draw is Complete! 🎉</div>`;
+    document.getElementById('pot-label').innerHTML='';
+    showBracket();
+    return;
+  }
+  const item=drawOrder[idx];
+  const potNames=['','🥇 Pot 1 — Seeds','🥈 Pot 2 — Contenders','🥉 Pot 3 — Challengers'];
+  document.getElementById('pot-label').innerHTML=`<div class="pot-label">🏺 ${potNames[item.pot]}</div>`;
+  
+  document.getElementById('ball-container').innerHTML=`<div class="ball pot${item.pot}-ball"><span class="flag">${item.team.flag}</span><span class="name">${item.team.name}</span><small>→ Group ${item.group}</small></div>`;
+  
+  const gIdx=drawResult.findIndex(g=>g.name===item.group);
+  const card=document.getElementById('group-'+gIdx);
+  const div=document.createElement('div');
+  div.className='group-team';
+  div.innerHTML=`<span class="pot-badge pot${item.pot}-badge">P${item.pot}</span>${item.team.flag} ${item.team.name}<span class="cat-tag">${item.team.cat}</span><small style="margin-left:auto;color:#888">${item.team.pts}</small>`;
+  card.appendChild(div);
+  
+  const delay=item.pot===1?2200:item.pot===2?1800:1400;
+  setTimeout(()=>revealNext(idx+1),delay);
+}
+
+function showBracket(){
+  const r16=[
+    ['1A','2D'],['1B','2C'],['1C','2B'],['1D','2A'],
+    ['1E','2H'],['1F','2G'],['1G','2F'],['1H','2E']
+  ];
+  let h=`<div class="bracket"><h2>🏟️ Round of 16 — Knockout Bracket</h2><div class="bracket-grid">`;
+  r16.forEach(([a,b])=>{
+    h+=`<div class="match">${a} <span class="vs">vs</span> ${b}</div>`;
+  });
+  h+=`</div><p style="margin-top:15px;color:#aaa;font-size:.85em">QF → SF → 🏆 Grand Final (25-31 Aug)</p>`;
+  h+=`<button onclick="generatePDF()" style="margin-top:20px;padding:12px 35px;font-size:1.1em;font-weight:bold;background:linear-gradient(45deg,#ffd700,#ff8c00);color:#1a0a2e;border:none;border-radius:50px;cursor:pointer;box-shadow:0 0 20px rgba(255,215,0,0.3)">📄 Download — Road to the Final</button>`;
+  h+=`</div>`;
+  document.getElementById('bracket-area').innerHTML=h;
+}
+
+function generatePDF(){
+  const r16=[['1A','2D'],['1B','2C'],['1C','2B'],['1D','2A'],['1E','2H'],['1F','2G'],['1G','2F'],['1H','2E']];
+  let groupsHTML='';
+  drawResult.forEach(g=>{
+    groupsHTML+=`<div style="border:1px solid #ccc;border-radius:8px;padding:10px;break-inside:avoid"><h3 style="color:#b8860b;margin-bottom:6px">Group ${g.name}</h3>`;
+    g.teams.forEach(t=>{
+      groupsHTML+=`<div style="padding:3px 0;border-bottom:1px solid #eee">${t.flag} <b>${t.name}</b> <span style="color:#888;font-size:.8em">${t.cat} · ${t.pts} pts</span></div>`;
+    });
+    groupsHTML+=`</div>`;
+  });
+
+  let bracketHTML='<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;max-width:500px;margin:0 auto">';
+  r16.forEach(([a,b])=>{bracketHTML+=`<div style="border:1px solid #ccc;border-radius:6px;padding:6px;text-align:center;font-size:.9em">${a} vs ${b}</div>`});
+  bracketHTML+=`</div>`;
+
+  const win=window.open('','_blank');
+  win.document.write(`<!DOCTYPE html><html><head><title>Road to the Final</title><style>
+    body{font-family:'Segoe UI',sans-serif;padding:30px;color:#222}
+    h1{text-align:center;color:#1a0a2e;margin-bottom:5px}
+    h2{text-align:center;color:#b8860b;margin:20px 0 10px}
+    .subtitle{text-align:center;color:#666;margin-bottom:25px}
+    .groups{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:25px}
+    .timeline{text-align:center;margin:20px 0;color:#555;font-size:.9em}
+    @media print{body{padding:15px}.groups{grid-template-columns:repeat(4,1fr)}}
+  </style></head><body>
+    <h1>🏆 All STARS World Cup</h1>
+    <p class="subtitle">Road to the Final — Draw Results</p>
+    <h2>Group Stage</h2>
+    <div class="groups">${groupsHTML}</div>
+    <h2>🏟️ Knockout Bracket — Round of 16</h2>
+    ${bracketHTML}
+    <div class="timeline">
+      <p><b>Round of 16:</b> 16–31 Jul &nbsp;|&nbsp; <b>Quarter-Finals:</b> 1–15 Aug &nbsp;|&nbsp; <b>Semi-Finals:</b> 16–24 Aug &nbsp;|&nbsp; <b>🏆 Grand Final:</b> 25–31 Aug</p>
+    </div>
+    <script>setTimeout(()=>{window.print()},500)<\/script>
+  </body></html>`);
+  win.document.close();
+}
+
+showInitial();
+</script>
+</body>
+</html>
